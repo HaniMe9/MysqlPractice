@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Management</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <!-- Add Product Form -->
+    <h2>Add New Product</h2>
+    <form action="/add-product" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="category_id">Select Category:</label>
+        <select id="category_id" name="category_id" required>
+          <!-- Categories will be loaded here dynamically -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="name">Product Name:</label>
+        <input type="text" id="name" name="name" required/>
+      </div>
+
+      <div class="form-group">
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" step="0.01" required/>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="image">Product Image:</label>
+        <input type="file" id="image" name="image" accept="image/*"/>
+      </div>
+
+      <button type="submit">Add Product</button>
+    </form>
+
+    <div id="categoryMessage"></div>
+
+    <!-- Product List Table -->
+    <h2>Product List</h2>
+    <table id="productTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Category ID</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Description</th>
+          <th>Image</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody">
+        <!-- Products will be dynamically loaded here -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Load categories dynamically
+    function loadCategories() {
+      fetch('http://localhost:3000/categories')
+        .then(response => response.json())
+        .then(categories => {
+          const categorySelect = document.getElementById('category_id');
+          categorySelect.innerHTML = ''; // Clear existing options
+
+          categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+          });
+        })
+        .catch(error => console.error('Error loading categories:', error));
+    }
+
+    // Load products dynamically
+    function loadProducts() {
+      fetch('http://localhost:3000/products')
+        .then(response => response.json())
+        .then(products => {
+          const tableBody = document.getElementById('productTableBody');
+          tableBody.innerHTML = ''; // Clear existing rows
+
+          products.forEach(product => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${product.id}</td>
+              <td>${product.category_id}</td>
+              <td>${product.name}</td>
+              <td>$${product.price}</td>
+              <td>${product.description}</td>
+              <td><img src="uploads/${product.image}" alt="Product Image" width="100"/></td>
+            `;
+            tableBody.appendChild(row);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching products:', error);
+        });
+    }
+
+    // Load data when the page loads
+    window.onload = function () {
+      loadCategories();
+      loadProducts();
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select,
+    .form-group button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    .form-group button {
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+    }
+
+    .form-group button:hover {
+      background-color: #218838;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    img {
+      max-width: 100px;
+      height: auto;
+    }
+  </style>
+</body>
+</html>
